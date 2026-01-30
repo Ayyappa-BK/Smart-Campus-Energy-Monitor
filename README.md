@@ -68,6 +68,3 @@ Manifests are provided in the `k8s/` directory.
 ```bash
 kubectl apply -f k8s/deployment.yaml
 ```
-
----
-*Created for the "Smart Campus" Distributed Systems Project.*
