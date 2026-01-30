@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  aggregator-service:
+    build:
+      context: .
+      dockerfile: docker/aggregator.Dockerfile
+    ports:
+      - "50051:50051"
+      - "2112:2112"
+    networks:
+      - smart-campus
+
+  sensor-simulator:
+    build:
+      context: .
+      dockerfile: docker/sensor.Dockerfile
+    environment:
+      - AGGREGATOR_HOST=aggregator-service:50051
+    depends_on:
+      - aggregator-service
+    networks:
+      - smart-campus
+
+  alert-service:
+    build:
+      context: .
+      dockerfile: docker/alert.Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - AWS_REGION=us-east-1
+      - S3_BUCKET_NAME=smart-campus-mock-bucket
+    networks:
+      - smart-campus
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - smart-campus
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    volumes:
+      - ./monitoring/alertmanager/config.yml:/etc/alertmanager/config.yml
+    ports:
+      - "9093:9093"
+    networks:
+      - smart-campus
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - smart-campus
+
+networks:
+  smart-campus:
+    driver: bridge

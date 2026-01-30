@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package sensor;
+
+option go_package = "./pb";
+
+service EnergySensor {
+  rpc StreamEnergyData (stream EnergyReading) returns (StreamResponse);
+}
+
+message EnergyReading {
+  string building_id = 1;
+  string floor_id = 2;
+  double current_wattage = 3;
+  double voltage = 4;
+  int64 timestamp = 5;
+}
+
+message StreamResponse {
+  bool success = 1;
+  string message = 2;
+}

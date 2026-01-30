@@ -1,0 +1,11 @@
+groups:
+  - name: energy_alerts
+    rules:
+      - alert: HighWattage
+        expr: avg by (building_id) (energy_current_wattage) > 4000
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High Energy Consumption in {{ $labels.building_id }}"
+          description: "Building {{ $labels.building_id }} has exceeded 4000W for more than 2 minutes."
